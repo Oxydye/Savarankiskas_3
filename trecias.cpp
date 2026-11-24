@@ -8,10 +8,12 @@ int main() {
  
     int pasirinkimas;
 
-    string kategorija;
-    string pavadinimas;
-    double kaina;
-    int kiekis;
+    const int max = 100;
+
+    string kategorijos[max];
+    string pavadinimai[max];
+    double kainos[max];
+    int kiekiai[max];
 
     cout << fixed << setprecision(2);
 
@@ -27,6 +29,23 @@ int main() {
 
     int eiluciuKiekis;
     fin >> eiluciuKiekis;
+
+    char skirtukas;
+    string eiluciuLiekana;
+
+    getline(fin, eiluciuLiekana);
+
+    for (int i = 0; i < eiluciuKiekis; i++) {
+        getline(fin, kategorijos[i], ';');
+        getline(fin, pavadinimai[i], ';');
+        fin >> kainos[i];
+        fin.ignore();
+        fin >> kiekiai[i];
+        getline(fin, eiluciuLiekana);
+    }
+    
+
+
 
 
     do {
