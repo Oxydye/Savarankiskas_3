@@ -54,6 +54,8 @@ void spausdintiAtaskaita(ostream& out, string kategorijos[], string pavadinimai[
     out << fixed << setprecision(2);
     out << "--------------------------------------------------------------------------------------------------------------------------------------------------------"<< endl;
 
+    //Spausdintuvas 9000//
+
     for (int i = 0; i < prekiuKiekis; i++) {
         double suma = eilutesSuma(kainos[i], kiekiai[i]);
         double nuolaida = galimaNuolaida(suma, kiekiai[i]);
@@ -80,6 +82,67 @@ void spausdintiAtaskaita(ostream& out, string kategorijos[], string pavadinimai[
     out << "Dalys: " << kategorijosSuma(kategorijos, kainos, kiekiai, prekiuKiekis, "Dalys") << " Eur" << endl;
     out << "Aksesuarai: " << kategorijosSuma(kategorijos, kainos, kiekiai, prekiuKiekis, "Aksesuarai") << " Eur" << endl << endl;
 }
+
+bool tinkamaKategorija(string kategorija) {
+    if (kategorija == "Dviraciai" || kategorija == "Dalys" || kategorija == "Aksesuarai") {
+        return true;
+    }
+    return false;
+}
+
+int duomenuSkaitytojas(string kategorijos[], string pavadinimai[], double kainos[], int kiekiai[]) {
+    ifstream fin("uzsakymas.txt");
+
+    if (!fin.is_open()) {
+        cout << "Failas neatsidare, del kazkokios klaidos." << endl;
+        return 0;
+    }
+
+    int eiluciuKiekis;
+    fin >> eiluciuKiekis;
+
+    if (fin.fail() || eiluciuKiekis < 1 || eiluciuKiekis > 100) {
+        cout << "Irasu skaicius turi buti nuo 1 iki 100." << endl;
+        return 0;
+    }
+
+    string eiluciuLiekana;
+    getline(fin, eiluciuLiekana);
+
+    for (int i = 0; i < eiluciuKiekis; i++) {
+        getline(fin, kategorijos[i], ';');
+        getline(fin, pavadinimai[i], ';');
+        fin >> kainos[i];
+        fin.ignore();
+        fin >> kiekiai[i];
+
+        if (fin.fail()) {
+            cout << "Ivyko klaida failo skaityme." << endl;
+            return 0;
+        }
+
+        getline(fin, eiluciuLiekana);
+
+        if (!tinkamaKategorija(kategorijos[i])) {
+            cout << "Prekes kategorija netinkama." << endl;
+            return 0;
+        }
+
+        if (kainos[i] <= 0) {
+            cout << "Prekes kaina turi buti teigiama." << endl;
+            return 0;
+        }
+
+        if (kiekiai[i] <= 0) {
+            cout << "Prekes kiekis turi buti teigiamas." << endl;
+            return 0;
+        }
+    }
+
+    fin.close();
+    return eiluciuKiekis;
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -102,32 +165,13 @@ int main() {
  //kontrolinis//
  //nuo algoritmu iki funkciju, funkcijos ne//
  //paprastieji duomenu tipai nieko//
-    
-    ifstream fin("uzsakymas.txt");
 
-    if (!fin.is_open()) {
-        cout << "Uzsakymo failas neatsidare, del kazkokios klaidos." << endl;
+  int eiluciuKiekis = duomenuSkaitytojas(kategorijos, pavadinimai, kainos, kiekiai);
+
+    if (eiluciuKiekis == 0) {
+        cout << "Duomenys nenuskaityti. Klaida su failo skaitymu." << endl;
         return 1;
     }
-
-    int eiluciuKiekis;
-    fin >> eiluciuKiekis;
-
-    string eiluciuLiekana;
-
-    getline(fin, eiluciuLiekana);
-
-    for (int i = 0; i < eiluciuKiekis; i++) {
-        getline(fin, kategorijos[i], ';');
-        getline(fin, pavadinimai[i], ';');
-        fin >> kainos[i];
-        fin.ignore();
-        fin >> kiekiai[i];
-        getline(fin, eiluciuLiekana);
-    }
-    
-
-
 
 
     do {
@@ -144,16 +188,19 @@ int main() {
         cout << endl;
 
         // Neteisingas //
-        if (pasirinkimas < 1 || pasirinkimas > 7) {
+        if (cin.fail() || pasirinkimas < 1 || pasirinkimas > 7) {
             cout << "Neteisingas pasirinkimas. Iveskite skaiciu nuo 1 iki 7." << endl;
+            cin.clear();
+            cin.ignore(1000, '\n');
         }
 
         // Pabaiga //
         if (pasirinkimas == 7) {
-            cout << "Grazios dienos." << endl;
             return 0;
         }
         
+        //
+
         if (pasirinkimas == 1) {
             for (int i = 0; i < eiluciuKiekis; i++) {
                 suma = eilutesSuma(kainos[i], kiekiai[i]);
@@ -166,10 +213,9 @@ int main() {
                      << suma << " Eur | "
                      << nuolaida << " Eur | "
                      << suma - nuolaida << " Eur" << endl;
-                     cout << endl;
 
             }
-            
+            cout << endl;
 
         }
 
@@ -185,9 +231,13 @@ int main() {
                 cout << "3. Aksesuarai" << endl;
                 cout << "Jusu pasirinkimas: ";
                 cin >> katPasirinkimas;
+                
+                //Neteisingas//
 
-                if (katPasirinkimas < 1 || katPasirinkimas > 3) {
-                    cout << "Neteisingas pasirinkimas. Iveskite skaiciu nuo 1 iki 3." << endl;
+                if (cin.fail() || katPasirinkimas < 1 || katPasirinkimas > 3) {
+                    cout << "Neteisingas pasirinkimas. Iveskite skaiciu nuo 1 iki 3." << endl << endl;
+                    cin.clear();
+                    cin.ignore(1000, '\n');
                 }
 
             } while (katPasirinkimas < 1 || katPasirinkimas > 3);
@@ -199,6 +249,8 @@ int main() {
             } else {
                 pasirinktaKategorija = "Aksesuarai";
             }
+
+            //Kategorijos prekiu spausdintuvas
 
             for (int i = 0; i < eiluciuKiekis; i++) {
                 if (kategorijos[i] == pasirinktaKategorija) {
@@ -218,9 +270,9 @@ int main() {
             suma = kategorijosSuma(kategorijos, kainos, kiekiai, eiluciuKiekis, pasirinktaKategorija);
 
             if (suma == 0) {
-                cout << "Sios kategorijos prekiu uzsakyme nera." << endl << endl;
+                cout << "Sios kategorijos prekiu nera." << endl << endl;
             } else {
-                cout << "Kategorijos moketina suma: " << suma << " Eur" << endl << endl;
+                cout << "Suma uz visa kategorija: " << suma << " Eur" << endl << endl;
             }
         }
 
